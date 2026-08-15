@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sealed Editions earned collectibles on DuskEVM</title>
+<meta name="description" content="A testnet collectibles gallery on DuskEVM. Each seal is earned by participating not bought, not randomized, no chance mechanics." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08090D;
+    --surface:#101218;
+    --surface-2:#171A22;
+    --line: rgba(255,255,255,0.08);
+    --pink:#FF3D8A;
+    --pink-dim: rgba(255,61,138,0.35);
+    --cyan:#34E7E4;
+    --cyan-dim: rgba(52,231,228,0.3);
+    --gold:#E0B84C;
+    --gold-dim: rgba(224,184,76,0.3);
+    --text:#EDEEF2;
+    --text-muted:#8A8F9C;
+    --text-faint:#565B68;
+    --danger:#FF6B6B;
+  }
+
+  *{ box-sizing:border-box; }
+  [hidden]{ display:none !important; }
+  html{ scroll-behavior:smooth; scroll-padding-top:96px; }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3{ font-family:'Space Grotesk', sans-serif; font-weight:500; margin:0; letter-spacing:-0.01em; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{ color:inherit; }
+
+  :focus-visible{
+    outline:2px solid var(--pink);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 28px; }
+
+  /* ---------- NAV ---------- */
+  .site-nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(8,9,13,0.72);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 0;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Space Grotesk', sans-serif; font-size:1.05rem; font-weight:600;
+    text-decoration:none; color:var(--text);
+  }
+  .brand .mark{
+    width:18px; height:18px;
+    border:1.5px solid var(--pink);
+    transform:rotate(45deg);
+    box-shadow:0 0 10px var(--pink-dim);
+  }
+  .brand .tag{ font-size:0.68rem; color:var(--text-faint); font-weight:400; }
+  .nav-links{ display:flex; gap:26px; font-size:0.84rem; color:var(--text-muted); }
+  .nav-links a{ text-decoration:none; transition:color .15s ease; }
+  .nav-links a:hover{ color:var(--text); }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    display:grid; grid-template-columns:1.1fr 0.9fr;
+    gap:40px; align-items:center;
+    padding:56px 0 48px;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.7rem; letter-spacing:0.09em; text-transform:uppercase;
+    color:var(--cyan);
+    border:1px solid var(--cyan-dim);
+    background:rgba(52,231,228,0.05);
+    padding:6px 12px; border-radius:4px;
+    margin-bottom:20px;
+  }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan-dim); }
+  .hero h1{ font-size:clamp(2.2rem, 4.2vw, 3.2rem); line-height:1.06; max-width:12ch; }
+  .hero h1 .glow{ color:var(--pink); text-shadow:0 0 20px var(--pink-dim); }
+  .hero p.lede{ margin-top:16px; font-size:0.98rem; color:var(--text-muted); max-width:40ch; }
+  .hero-ctas{ display:flex; gap:12px; margin-top:28px; flex-wrap:wrap; }
+
+  .btn{
+    font-family:'Inter', sans-serif;
+    font-size:0.9rem; font-weight:500;
+    padding:11px 18px;
+    border-radius:6px;
+    border:1px solid var(--line);
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    color:var(--text);
+    transition:transform .12s ease, border-color .15s ease, background .15s ease;
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn-primary{
+    background:var(--pink); color:#1a0510;
+    border-color:var(--pink);
+    box-shadow:0 0 16px var(--pink-dim);
+  }
+  .btn-primary:hover{ filter:brightness(1.08); }
+
+  .nav-right{ display:flex; align-items:center; gap:24px; }
+  .nav-donate{
+    background:transparent;
+    border:none; padding:0; cursor:pointer;
+    font-family:'Inter', sans-serif; font-size:0.84rem;
+    color:var(--text-muted);
+    transition:color .15s ease;
+  }
+  .nav-donate:hover{ color:var(--text); }
+
+  .donate-wrap{ position:relative; display:flex; }
+  .donate-popover{
+    position:absolute; top:calc(100% + 12px); right:0; z-index:40;
+    width:min(360px, 80vw);
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; padding:14px 16px;
+    box-shadow:0 14px 40px rgba(0,0,0,0.5);
+  }
+  .dp-label{ font-size:0.72rem; color:var(--text-faint); display:block; margin-bottom:8px; }
+  .dp-address{
+    display:block; font-family:'IBM Plex Mono', monospace; font-size:0.72rem;
+    color:var(--text); background:var(--surface-2);
+    border:1px solid var(--line); border-radius:6px;
+    padding:10px 12px; word-break:break-all; line-height:1.5; margin-bottom:10px;
+  }
+  .dp-row{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .dp-copy{
+    background:var(--pink); color:#1a0510; border:none;
+    font-family:'Inter', sans-serif; font-size:0.8rem; font-weight:500;
+    padding:8px 14px; border-radius:6px; cursor:pointer;
+  }
+  .dp-copy:hover{ filter:brightness(1.08); }
+  .dp-state{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--cyan); }
+  .dp-note{ font-size:0.72rem; color:var(--text-faint); display:block; }
+
+  /* Reusable hover tooltip add class `tbtn` to any element with a
+     <span class="tooltip"> child and it shows a simple info bubble on hover. */
+  .tbtn{ position:relative; }
+  .tbtn .tooltip{
+    position:absolute; top:calc(100% + 9px); left:50%; transform:translateX(-50%);
+    width:max-content; max-width:230px;
+    background:rgba(23,26,34,0.96);
+    color:var(--text-muted); font-size:0.76rem; line-height:1.55;
+    padding:8px 12px; border-radius:6px; text-align:center;
+    box-shadow:0 6px 20px rgba(0,0,0,0.45);
+    opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
+    z-index:20;
+  }
+  .tbtn:hover .tooltip{ opacity:1; transform:translateX(-50%) translateY(2px); }
+  .btn-ghost{ background:transparent; }
+  .btn-ghost:hover{ border-color:var(--cyan-dim); color:var(--cyan); }
+  .btn:disabled{ opacity:0.45; cursor:not-allowed; transform:none; filter:none; }
+
+  /* portal */
+  .portal{ position:relative; height:230px; display:flex; align-items:center; justify-content:center; }
+  .portal svg{ width:230px; height:230px; opacity:0.9; will-change:transform; }
+  .portal-text{
+    position:absolute; inset:0; pointer-events:none;
+  }
+  .portal-text .pcount,
+  .portal-text .ptier{
+    position:absolute; left:50%; transform:translate(-50%,-50%);
+    font-family:'IBM Plex Mono', monospace; text-transform:uppercase; white-space:nowrap;
+  }
+  .portal-text .pcount{
+    top:50%; font-size:0.92rem; letter-spacing:0.02em; color:var(--cyan);
+  }
+  .portal-text .ptier{
+    top:4.5%; font-size:0.6rem; letter-spacing:0.14em; color:var(--gold);
+  }
+
+  /* ---------- PHILOSOPHY ---------- */
+  .strip{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:22px 0; }
+  .strip .inner{
+    display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+    font-size:0.86rem; color:var(--text-muted);
+  }
+  .strip .inner strong{ color:var(--text); font-family:'Space Grotesk', sans-serif; font-weight:500; }
+  .strip .sep{ color:var(--text-faint); }
+
+  /* ---------- SECTIONS ---------- */
+  section{ padding:64px 0; }
+  .section-head{ margin-bottom:40px; }
+  .section-head .kicker{
+    font-family:'IBM Plex Mono', monospace; font-size:0.72rem;
+    letter-spacing:0.09em; text-transform:uppercase; color:var(--text-faint);
+    margin-bottom:10px; display:block;
+  }
+  .section-head h2{ font-size:1.75rem; }
+  .section-head p{ color:var(--text-muted); font-size:0.9rem; max-width:52ch; margin-top:10px; }
+
+  /* ---------- GALLERY ---------- */
+  .gallery{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    display:flex; flex-direction:column;
+    transition:border-color .18s ease, transform .18s ease;
+  }
+  .card:hover{ border-color:var(--pink-dim); transform:translateY(-2px); }
+  .card .art{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    background:var(--surface-2); position:relative;
+  }
+  .card .art svg{ width:64%; height:64%; }
+  .card .meta{ padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .card .meta .name{ font-family:'Space Grotesk', sans-serif; font-size:0.92rem; font-weight:600; }
+  .card .desc{ padding:0 16px 6px; font-size:0.78rem; color:var(--text-muted); flex:1; }
+  .card .foot{ padding:12px 16px 14px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .card .earn{ font-family:'IBM Plex Mono', monospace; font-size:0.66rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.04em; }
+  .card .status{ font-family:'IBM Plex Mono', monospace; font-size:0.68rem; padding:3px 8px; border-radius:4px; border:1px solid var(--line); color:var(--text-muted); }
+  .card .status.owned{ color:var(--cyan); border-color:var(--cyan-dim); }
+  .card .status.locked{ color:var(--danger); border-color:rgba(255,107,107,0.3); }
+
+  .rarity{
+    font-family:'IBM Plex Mono', monospace; font-size:0.66rem;
+    letter-spacing:0.04em; text-transform:uppercase;
+    padding:3px 8px; border-radius:4px; display:inline-block; white-space:nowrap;
+  }
+  .rarity.common{ color:var(--text-muted); border:1px solid var(--line); }
+  .rarity.rare{ color:var(--cyan); border:1px solid var(--cyan-dim); }
+  .rarity.legend{ color:var(--gold); border:1px solid var(--gold-dim); }
+
+  /* ---------- WALLET PANEL ---------- */
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:30px;
+  }
+  .panel-top{
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:14px;
+    margin-bottom:24px; padding-bottom:20px;
+    border-bottom:1px solid var(--line);
+  }
+  .account-label{ font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--text-faint); }
+  .stat-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .stat{ background:var(--surface-2); border-radius:8px; padding:16px 18px; }
+  .stat .label{ font-size:0.76rem; color:var(--text-faint); margin-bottom:6px; }
+  .stat .value{ font-family:'IBM Plex Mono', monospace; font-size:0.92rem; }
+  .panel-note{
+    margin-top:22px; padding-top:18px; border-top:1px solid var(--line);
+    font-size:0.8rem; color:var(--text-faint); line-height:1.6;
+  }
+  .panel-note code{ font-family:'IBM Plex Mono', monospace; font-size:0.76rem; color:var(--cyan); }
+
+  /* ---------- BID FORMS ---------- */
+  .bid-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:20px; }
+  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:22px; }
+  .form-card{ background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:18px; }
+  .form-card h3{ font-size:0.95rem; font-weight:600; margin-bottom:4px; }
+  .form-card .hint{ font-size:0.78rem; color:var(--text-muted); margin-bottom:14px; }
+  .field-group{ margin-bottom:12px; }
+  label{ display:block; font-size:0.76rem; color:var(--text-muted); margin-bottom:5px; }
+  input[type="text"], input[type="number"]{
+    width:100%; background:var(--surface); border:1px solid var(--line);
+    border-radius:6px; padding:9px 10px; color:var(--text);
+    font-family:'IBM Plex Mono', monospace; font-size:0.82rem;
+  }
+  input::placeholder{ color:var(--text-faint); }
+  .form-card .btn{ width:100%; justify-content:center; }
+  .phase-badge{ font-family:'IBM Plex Mono', monospace; font-size:0.78rem; padding:5px 11px; border-radius:999px; border:1px solid var(--line); color:var(--text-muted); }
+  .phase-badge[data-live="commit"]{ border-color:var(--pink-dim); color:var(--pink); }
+  .phase-badge[data-live="reveal"]{ border-color:var(--cyan-dim); color:var(--cyan); }
+  .phase-badge[data-live="ended"]{ border-color:var(--gold-dim); color:var(--gold); }
+
+  /* ---------- DISCLAIMER ---------- */
+  .disclaimer{
+    border:1px solid var(--gold-dim);
+    background:rgba(224,184,76,0.05);
+    border-radius:8px;
+    padding:12px 14px;
+    font-size:0.8rem;
+    color:var(--text-muted);
+    line-height:1.55;
+    margin-top:20px;
+  }
+  .disclaimer strong{ color:var(--gold); }
+  .disclaimer code{ font-family:'IBM Plex Mono', monospace; font-size:0.76rem; color:var(--cyan); }
+  .hero-disclaimer{ max-width:46ch; }
+
+  /* ---------- MESSAGES ---------- */
+  .msg{
+    margin-top:16px; font-size:0.82rem; font-family:'IBM Plex Mono', monospace;
+    padding:10px 12px; border-radius:8px; display:none; word-break:break-word;
+  }
+  .msg.show{ display:block; }
+  .msg.info{ background:rgba(52,231,228,0.08); color:var(--cyan); }
+  .msg.error{ background:rgba(255,107,107,0.1); color:var(--danger); }
+  .msg.success{ background:rgba(224,184,76,0.1); color:var(--gold); }
+
+  /* ---------- WALLET PICKER ---------- */
+  .wallet-picker{
+    position:fixed; inset:0; z-index:60;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(8,9,13,0.6);
+    backdrop-filter:blur(3px);
+  }
+  .wp-box{
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:20px; width:min(320px, 88vw);
+    box-shadow:0 18px 50px rgba(0,0,0,0.55);
+  }
+  .wp-title{ display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:12px; }
+  .wp-list{ display:flex; flex-direction:column; gap:8px; }
+  .wp-item{
+    background:var(--surface-2); border:1px solid var(--line);
+    color:var(--text); font-family:'Inter', sans-serif; font-size:0.86rem;
+    padding:11px 14px; border-radius:8px; text-align:left; cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .wp-item:hover{ border-color:var(--cyan-dim); color:var(--cyan); }
+
+  footer{
+    padding:40px 0 60px;
+    border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:16px;
+    color:var(--text-faint); font-size:0.8rem;
+  }
+  footer a{ color:var(--text-muted); text-decoration:none; }
+  footer a:hover{ color:var(--text); }
+
+  /* ---------- SCROLL POLISH ---------- */
+  .portal svg{ will-change:transform; }
+  /* Reveal only kicks in when JS is confirmed running (html.js is added by
+     the script). Without JS, content stays fully visible. */
+  html.js .reveal{
+    opacity:0; transform:translateY(14px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  html.js .reveal.in-view{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion: reduce){
+    html.js .reveal{ opacity:1; transform:none; transition:none; }
+    .portal svg{ transform:none !important; }
+  }
+
+  @media (max-width: 900px){
+    .hero{ grid-template-columns:1fr; padding-top:32px; }
+    .portal{ order:-1; height:200px; }
+    .portal svg{ width:200px; height:200px; }
+    .gallery{ grid-template-columns:repeat(2,1fr); }
+    .stat-row{ grid-template-columns:1fr; }
+  }
+  @media (max-width: 600px){
+    .nav-links{ gap:16px; font-size:0.78rem; }
+    .gallery{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <div class="wrap nav-inner">
+    <nav>
+      <a class="brand" href="#top">
+        <span class="mark"></span> Sealed
+        <span class="tag mono">// editions</span>
+      </a>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a class="tbtn" href="#why">How it works<span class="tooltip" role="tooltip">The commit → reveal → settle idea, in plain words.</span></a>
+          <a class="tbtn" href="#wallet">Bid<span class="tooltip" role="tooltip">Place a sealed bid once the auction is wired to the contract.</span></a>
+          <a class="tbtn" href="https://explorer.testnet.evm.dusk.network/" target="_blank" rel="noopener">Explorer<span class="tooltip" role="tooltip">Browse DuskEVM testnet blocks and transactions.</span></a>
+          <a class="tbtn" href="https://github.com" target="_blank" rel="noopener">GitHub<span class="tooltip" role="tooltip">Source code for this project.</span></a>
+          <a class="tbtn" href="https://x.com/koyonakara" target="_blank" rel="noopener">X<span class="tooltip" role="tooltip">@koyonakara follow for updates.</span></a>
+        </div>
+        <div class="donate-wrap">
+          <button class="nav-donate tbtn" id="donateBtn" type="button" aria-label="Donate DUSK">
+            Donate
+            <span class="tooltip" role="tooltip">Support this project if you like it, you can send me a little real DUSK.</span>
+          </button>
+          <div class="donate-popover" id="donatePopover" hidden>
+            <span class="dp-label">Send DUSK to this address</span>
+            <code class="dp-address" id="dpAddress"></code>
+            <div class="dp-row">
+              <button class="dp-copy" id="dpCopy">Copy address</button>
+              <span class="dp-state" id="dpState"></span>
+            </div>
+            <span class="dp-note">Send via the Dusk wallet, or to <code>koyo.dusk</code> — it resolves to this same address.</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero" id="top">
+    <div>
+      <span class="eyebrow"><span class="dot"></span> Live on DuskEVM testnet</span>
+      <h1>Proof you were here <span class="glow">early</span>.</h1>
+      <p class="lede">
+        A testnet collectibles gallery. Each seal is a mark that you showed up 
+        earned by participating, not bought. No gacha, no luck, no chance mechanics.
+      </p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary tbtn" id="connectBtn">Connect wallet<span class="tooltip" role="tooltip">Connect an EVM wallet to participate on DuskEVM testnet.</span></button>
+        <a class="btn btn-ghost tbtn" href="#seals">Browse the seals<span class="tooltip" role="tooltip">See the six earned editions no gacha, no luck.</span></a>
+      </div>
+
+      <div class="disclaimer hero-disclaimer">
+        <strong>⚠️ Bidding is testnet only.</strong> Please don't connect a real wallet or send real DUSK
+        to bid. But if you'd like to support the project, the <strong>Donate</strong> button is real; send
+        DUSK via the Dusk wallet.
+      </div>
+    </div>
+
+    <div class="portal">
+      <svg viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="10" y="10" width="200" height="200" stroke="#FF3D8A" stroke-width="1.5" opacity="0.9"/>
+        <rect x="30" y="30" width="160" height="160" stroke="#34E7E4" stroke-width="1.5" opacity="0.55"/>
+        <rect x="50" y="50" width="120" height="120" stroke="#E0B84C" stroke-width="1.5" opacity="0.5"/>
+        <rect x="70" y="70" width="80" height="80" stroke="#34E7E4" stroke-width="1.5" opacity="0.8"/>
+      </svg>
+      <div class="portal-text">
+        <span class="pcount" id="countdown"></span>
+        <span class="ptier" id="portalState">starts in</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="strip">
+  <div class="wrap inner">
+    <span><strong>Earned, not bought.</strong></span>
+    <span class="sep">/</span>
+    <span>Each edition maps to a real action on the testnet a clean reveal, a won auction, a deployment.</span>
+    <span class="sep">/</span>
+    <span>Verifiable on-chain, no randomness.</span>
+  </div>
+</div>
+
+<section id="why">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Why</span>
+      <h2>A reason that fits Dusk, not a gamble.</h2>
+      <p>
+        Collectibles feel speculative. These aren't. They're participation proofs in the style of a
+        pressed seal reflecting Dusk's own values of verifiable settlement, clean accounting, and no
+        front-running. You earn an edition by doing something; the chain remembers it.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="seals">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">First set</span>
+      <h2>Sealed editions</h2>
+      <p>Six seals to start. Rarity reflects the difficulty of the action, never luck.</p>
+    </div>
+
+    <div class="gallery" id="gallery"></div>
+  </div>
+</section>
+
+<section id="bid">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Auction</span>
+      <h2>Place a sealed bid</h2>
+      <p>Commit a hidden bid, reveal it later the highest valid bid wins, and the winner gets a unique edition.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-top">
+        <span class="phase-badge" id="phaseBadge" data-live="commit">Reading phase…</span>
+        <span class="mono account-label" id="auctionStatus">loading…</span>
+      </div>
+
+      <div class="bid-stats">
+        <div class="stat"><div class="label">Commit deadline</div><div class="value" id="commitDeadlineVal"></div></div>
+        <div class="stat"><div class="label">Reveal deadline</div><div class="value" id="revealDeadlineVal"></div></div>
+        <div class="stat"><div class="label">Winner (post-settle)</div><div class="value" id="winnerVal"></div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-card">
+          <h3>Commit a bid</h3>
+          <p class="hint">A random salt is generated and saved in your browser. You will need it to reveal your bid.</p>
+          <div class="field-group"><label for="commitAmount">Bid amount (DUSK)</label><input type="number" id="commitAmount" placeholder="0.05" min="0" step="0.001"></div>
+          <div class="field-group"><label for="commitDeposit">Deposit (DUSK, ≥ bid)</label><input type="number" id="commitDeposit" placeholder="0.06" min="0" step="0.001"></div>
+          <div class="field-group"><label for="commitSalt">Salt (auto)</label><input type="text" id="commitSalt" readonly></div>
+          <div class="dp-row"><button class="btn btn-ghost" id="copySaltBtn" type="button">Copy salt</button><span class="dp-state" id="saltState"></span></div>
+          <button class="btn btn-primary" id="commitBtn">Commit bid</button>
+          <div class="msg" id="commitMsg"></div>
+        </div>
+
+        <div class="form-card">
+          <h3>Reveal your bid</h3>
+          <p class="hint">Use the exact amount and salt from your commit.</p>
+          <div class="field-group"><label for="revealAmount">Bid amount (DUSK)</label><input type="number" id="revealAmount" placeholder="0.05" min="0" step="0.001"></div>
+          <div class="field-group"><label for="revealSalt">Salt</label><input type="text" id="revealSalt" placeholder="0x…"></div>
+          <button class="btn btn-primary" id="revealBtn">Reveal bid</button>
+          <div class="msg" id="revealMsg"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-card">
+          <h3>Settle</h3>
+          <p class="hint">Anyone can call this once the reveal window closes.</p>
+          <button class="btn btn-ghost" id="endBtn">End auction</button>
+          <div class="msg" id="endMsg"></div>
+        </div>
+        <div class="form-card">
+          <h3>Withdraw</h3>
+          <p class="hint">Winner reclaims the excess deposit; everyone else in full.</p>
+          <button class="btn btn-ghost" id="withdrawBtn">Withdraw</button>
+          <div class="msg" id="withdrawMsg"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      <strong>⚠️ Testnet only.</strong> This runs on the <strong>DuskEVM testnet</strong> 
+      don't connect a real (mainnet) wallet or send real DUSK here. Use a dedicated
+      test wallet with only testnet DUSK. Nothing here has real value and no real funds
+      are required to participate.
+    </div>
+  </div>
+</section>
+
+<section id="wallet">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Wallet</span>
+      <h2>Connect your wallet</h2>
+      <p>Connect to bid on the live testnet auction and see your earned editions.</p>
+    </div>
+    <div class="wallet-picker" id="walletPicker" hidden>
+      <div class="wp-box">
+        <span class="wp-title">Choose a wallet</span>
+        <div class="wp-list" id="walletPickerList"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-top">
+        <span class="mono account-label" id="accountLabel">Not connected</span>
+        <span class="mono account-label" id="chainLabel">DuskEVM Testnet · chain 745</span>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat"><div class="label">Editions earned</div><div class="value" id="statEarned"></div></div>
+        <div class="stat"><div class="label">Supply (first set)</div><div class="value" id="statSupply">6 / 6</div></div>
+        <div class="stat"><div class="label">Contract</div><div class="value" id="statContract">live</div></div>
+      </div>
+
+      <div class="msg" id="msg"></div>
+
+      <div class="disclaimer">
+        <strong>Bidding is testnet only.</strong> Don't connect a real wallet or send real DUSK to bid.
+        Want to support the project? The <strong>Donate</strong> button is real; send DUSK via the Dusk wallet.
+      </div>
+
+      <div class="panel-note">
+        Winning the auction mints a <strong>unique NFT</strong> to the winner automatically there's no claim
+        step. It appears as an earned edition below.
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer>
+    <span>Sealed Editions built on DuskEVM testnet.</span>
+    <span>
+      <a href="https://docs.dusk.network/developer/duskevm/quickstart/" target="_blank" rel="noopener">DuskEVM docs</a>
+      &nbsp;·&nbsp;
+      <a href="https://explorer.testnet.evm.dusk.network/" target="_blank" rel="noopener">Explorer</a>
+      &nbsp;·&nbsp;
+      <a href="https://x.com/koyonakara" target="_blank" rel="noopener">X · @koyonakara</a>
+    </span>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+<script>
+document.documentElement.classList.add("js");
+// ---------------------------------------------------------------
+// Configuration contract wiring goes here once it's deployed.
+// Everything below is a self-contained frontend preview.
+// ---------------------------------------------------------------
+const CONTRACT_ADDRESS = "0x276E5522Bbb0708c106596366F1B3E8E1FE25596"; // SealedBidAuction (DuskEVM testnet)
+const RPC_URL = "https://rpc.testnet.evm.dusk.network";
+const CHAIN_ID_HEX = "0x2e9";         // 745
+const CHAIN_ID = 745n;
+
+// Your Dusk DS (public) address for donations. Because it's a DS address
+// (not an EVM 0x… address), the button copies it for sending via the Dusk
+// wallet rather than doing an EVM transfer.
+const DONATE_ADDRESS = "mgqa1DENdj5MmczrvjVNs5JrGhZMCSVjtrX2titb3RrM4XL8n9bFuwXoHH7R4Z5vmvxMRph72F9mAzWPRsS8e5VmKbEvcW4NT1gt6WbjX9TLhUkqAr1beXmiaZhfiFijDP2";
+
+// When the auction is scheduled to start (a "starts in" countdown until this
+// moment). After it passes, the portal shows the live contract phase countdown.
+// Computed below so the next auction always starts 24h from page load. Set to a
+// fixed ISO string instead if you want a specific date.
+const AUCTION_STARTS_AT = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+// Contract ABI matches contracts/SealedBidAuction.sol (deployed to testnet).
+const ABI = [
+  "function beneficiary() view returns (address)",
+  "function bidderCount() view returns (uint256)",
+  "function bidders(uint256) view returns (address)",
+  "function bids(address) view returns (bytes32,uint256,uint256,bool,bool)",
+  "function commitBid(bytes32 commitment) payable",
+  "function commitDeadline() view returns (uint256)",
+  "function currentPhase() view returns (uint8)",
+  "function editions() view returns (address)",
+  "function endAuction()",
+  "function ended() view returns (bool)",
+  "function highestBid() view returns (uint256)",
+  "function highestBidder() view returns (address)",
+  "function minDeposit() view returns (uint256)",
+  "function revealBid(uint256 amount, bytes32 salt)",
+  "function revealDeadline() view returns (uint256)",
+  "function withdraw()"
+];
+
+// ---------------------------------------------------------------
+// Seal catalog the six editions in the first set.
+// "earn" is shown on the card; contract checks go into "check" later.
+// ---------------------------------------------------------------
+const SEALS = [
+  {
+    id: 0, name: "First Commit", rarity: "common", rarityLabel: "Common",
+    earn: "Submit your first commit", color: "#565B68",
+    desc: "You opened the books. The first hash you sealed to the testnet.",
+    art: (c) => `
+      <rect x="15" y="15" width="70" height="70" stroke="${c}" stroke-width="2" fill="none"/>
+      <rect x="32" y="32" width="36" height="36" stroke="${c}" stroke-width="2" fill="none"/>`
+  },
+  {
+    id: 1, name: "Clean Reveal", rarity: "rare", rarityLabel: "Rare", color: "#34E7E4",
+    earn: "A clean reveal, no mismatches", desc: "You revealed exactly what you committed zero disputes.",
+    art: (c) => `
+      <rect x="12" y="12" width="76" height="76" stroke="${c}" stroke-width="2" fill="none" opacity="0.9"/>
+      <rect x="28" y="28" width="44" height="44" stroke="${c}" stroke-width="2" fill="none" opacity="0.6"/>
+      <rect x="42" y="42" width="16" height="16" stroke="${c}" stroke-width="2" fill="none"/>`
+  },
+  {
+    id: 2, name: "Auction Winner", rarity: "rare", rarityLabel: "Rare", color: "#FF3D8A",
+    earn: "Win a sealed-bid auction", desc: "Sealed it, revealed it, took it. First-past-the-post, no sniping.",
+    art: (c) => `
+      <rect x="10" y="10" width="80" height="80" stroke="${c}" stroke-width="2" fill="none" opacity="0.95"/>
+      <rect x="24" y="24" width="52" height="52" stroke="${c}" stroke-width="2" fill="none" opacity="0.7"/>
+      <rect x="38" y="38" width="24" height="24" stroke="${c}" stroke-width="2" fill="none" opacity="0.45"/>`
+  },
+  {
+    id: 3, name: "Testnet Explorer", rarity: "common", rarityLabel: "Common", color: "#565B68",
+    earn: "A transaction on the testnet", desc: "The first step. Every long run starts here.",
+    art: (c) => `
+      <rect x="18" y="18" width="64" height="64" stroke="${c}" stroke-width="2" fill="none" transform="rotate(45 50 50)"/>`
+  },
+  {
+    id: 4, name: "Genesis Deployer", rarity: "legend", rarityLabel: "Legendary", color: "#E0B84C",
+    earn: "Deploy the genesis contract", desc: "One of the first. The founder's mark genuinely rare.",
+    art: (c) => `
+      <rect x="10" y="10" width="80" height="80" stroke="${c}" stroke-width="2" fill="none"/>
+      <rect x="22" y="22" width="56" height="56" stroke="${c}" stroke-width="2" fill="none" opacity="0.75"/>
+      <rect x="34" y="34" width="32" height="32" stroke="${c}" stroke-width="2" fill="none" opacity="0.5"/>
+      <rect x="44" y="44" width="12" height="12" stroke="${c}" stroke-width="2" fill="none"/>`
+  },
+  {
+    id: 5, name: "Bug Hunter", rarity: "rare", rarityLabel: "Rare", color: "#FF3D8A",
+    earn: "Report a testnet issue", desc: "You found the seam in the seal. The chain thanks you.",
+    art: (c) => `
+      <rect x="14" y="14" width="72" height="72" stroke="#34E7E4" stroke-width="2" fill="none" opacity="0.5"/>
+      <rect x="14" y="14" width="72" height="72" stroke="${c}" stroke-width="2" fill="none" opacity="0.5" transform="rotate(45 50 50)"/>`
+  }
+];
+
+function $(id){ return document.getElementById(id); }
+function showMsg(el, text, type){ el.textContent = text; el.className = "msg show " + type; }
+
+// Render the gallery. Default status is neutral ""; refreshEditions() flips
+// the earned seals to "owned" once we know what the connected wallet holds.
+function renderGallery(){
+  const gallery = $("gallery");
+  gallery.innerHTML = SEALS.map((s) => {
+    return `
+      <article class="card reveal">
+        <div class="art"><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">${s.art(s.color)}</svg></div>
+        <div class="meta">
+          <span class="name">${s.name}</span>
+          <span class="rarity ${s.rarity}">${s.rarityLabel}</span>
+        </div>
+        <div class="desc">${s.desc}</div>
+        <div class="foot">
+          <span class="earn">${s.earn}</span>
+          <span class="status" data-seal="${s.id}"></span>
+        </div>
+      </article>`;
+  }).join("");
+}
+
+// Mark a seal card as owned/not in the gallery.
+function markSealOwned(sealId, owned){
+  const el = document.querySelector('.status[data-seal="' + sealId + '"]');
+  if (!el) return;
+  if (owned){
+    el.className = "status owned";
+    el.textContent = "owned";
+  } else {
+    el.className = "status";
+    el.textContent = "";
+  }
+}
+
+// ---------------------------------------------------------------
+// Wallet functional now. Contract read/write hooks go in later.
+// ---------------------------------------------------------------
+let provider, signer, address = null;
+
+// Best-effort name for an injected provider (MetaMask, Trust, Coinbase, Brave…).
+function walletName(p){
+  if (p.isMetaMask) return "MetaMask";
+  if (p.isTrust) return "Trust Wallet";
+  if (p.isCoinbaseWallet) return "Coinbase Wallet";
+  if (p.isBraveWallet) return "Brave Wallet";
+  if (p.isRabby) return "Rabby";
+  if (p.isSafe) return "Safe";
+  return "Wallet";
+}
+
+// Discover available wallets via EIP-6963, falling back to window.ethereum.
+// Returns [{ name, provider }]. Works with MetaMask, Trust, Coinbase, Brave,
+// Rabby and any EIP-1193 / EIP-6963 wallet. (WalletConnect QR needs its own
+// SDK + project id, so it's not included here.)
+function findProviders(){
+  return new Promise((resolve) => {
+    const list = [];
+    const seen = new Set();
+    const onAnnounce = (e) => {
+      const d = e.detail;
+      if (d && d.provider && d.info && d.info.uuid && !seen.has(d.info.uuid)){
+        seen.add(d.info.uuid);
+        list.push({ name: d.info.name || "Wallet", provider: d.provider });
+      }
+    };
+    window.addEventListener("eip6963:announceProvider", onAnnounce);
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+    setTimeout(() => {
+      window.removeEventListener("eip6963:announceProvider", onAnnounce);
+      if (window.ethereum && !list.some((w) => w.provider === window.ethereum)){
+        list.push({ name: walletName(window.ethereum), provider: window.ethereum });
+      }
+      resolve(list);
+    }, 100);
+  });
+}
+
+// Small on-page picker shown when more than one wallet is installed.
+// A single pending resolver is kept so that picking a wallet resolves with it,
+// and dismissing (outside click / Esc) resolves with null never hangs.
+let pickResolver = null;
+function showWalletPicker(providers, onPick){
+  pickResolver = onPick;
+  const overlay = $("walletPicker");
+  const listEl = $("walletPickerList");
+  listEl.innerHTML = "";
+  providers.forEach((w) => {
+    const btn = document.createElement("button");
+    btn.className = "wp-item";
+    btn.textContent = w.name;
+    btn.addEventListener("click", () => {
+      const r = pickResolver; pickResolver = null;
+      overlay.hidden = true;
+      if (r) r(w);
+    });
+    listEl.appendChild(btn);
+  });
+  overlay.hidden = false;
+}
+function closeWalletPicker(){
+  const overlay = $("walletPicker");
+  overlay.hidden = true;
+  const r = pickResolver; pickResolver = null;
+  if (r) r(null);
+}
+
+async function connectWallet(){
+  const msgEl = $("msg");
+  const providers = await findProviders();
+  if (providers.length === 0){
+    showMsg(msgEl, "No wallet found. Install MetaMask, Trust Wallet, Coinbase Wallet, or Brave, then open this page over http/https file:// blocks wallet injection.", "error");
+    return;
+  }
+
+  const chosen = providers.length === 1
+    ? providers[0]
+    : await new Promise((resolve) => showWalletPicker(providers, resolve));
+  if (!chosen) return;
+
+  const rawProvider = chosen.provider;
+  try {
+    provider = new ethers.BrowserProvider(rawProvider);
+    await provider.send("eth_requestAccounts", []);
+
+    const network = await provider.getNetwork();
+    if (network.chainId !== CHAIN_ID){
+      try {
+        await rawProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_ID_HEX }] });
+      } catch (switchErr){
+        if (switchErr.code === 4902){
+          await rawProvider.request({ method: "wallet_addEthereumChain", params: [{
+            chainId: CHAIN_ID_HEX,
+            chainName: "DuskEVM Testnet",
+            nativeCurrency: { name: "DUSK", symbol: "DUSK", decimals: 18 },
+            rpcUrls: [RPC_URL],
+            blockExplorerUrls: ["https://explorer.testnet.evm.dusk.network/"]
+          }]});
+        }
+      }
+    }
+
+    signer = await provider.getSigner();
+    address = await signer.getAddress();
+    $("accountLabel").textContent = address.slice(0,6) + "…" + address.slice(-4) + " · " + chosen.name;
+    $("connectBtn").textContent = "Connected";
+    $("connectBtn").disabled = true;
+
+    refreshEditions(address);
+  } catch (e){
+    console.error(e);
+    showMsg(msgEl, "Wallet connection failed: " + (e.message || e), "error");
+  }
+}
+
+$("connectBtn").addEventListener("click", connectWallet);
+
+// Close the wallet picker on outside click or Escape.
+document.addEventListener("click", (e) => {
+  if (!$("walletPicker").hidden && !e.target.closest("#walletPicker")){
+    closeWalletPicker();
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeWalletPicker();
+});
+
+// ---------------------------------------------------------------
+// Auction commit / reveal / settle / withdraw against SealedBidAuction.
+// Works identically against a local node or the real testnet: only
+// CONTRACT_ADDRESS + RPC_URL change.
+// ---------------------------------------------------------------
+function randomSalt(){
+  return ethers.hexlify(ethers.randomBytes(32));
+}
+
+let readContract = null;
+function fmtDeadline(ts){
+  if (!ts || ts === 0n) return "";
+  return new Date(Number(ts) * 1000).toLocaleString();
+}
+const PHASE_NAMES = ["commit", "reveal", "ended"];
+let countdownTarget = null;
+
+async function refreshBidState(){
+  if (!readContract){
+    $("auctionStatus").textContent = "not deployed set CONTRACT_ADDRESS";
+    return;
+  }
+  try {
+    const [phase, commitDl, revealDl, ended, winner, amount] = await Promise.all([
+      readContract.currentPhase(),
+      readContract.commitDeadline(),
+      readContract.revealDeadline(),
+      readContract.ended(),
+      readContract.highestBidder(),
+      readContract.highestBid()
+    ]);
+    const name = PHASE_NAMES[Number(phase)] || "commit";
+    const badge = $("phaseBadge");
+    badge.setAttribute("data-live", name);
+    badge.textContent = name === "commit" ? "commit" : name === "reveal" ? "reveal" : "ended";
+    $("portalState").textContent = name === "commit" ? "commit open"
+      : name === "reveal" ? "reveal open" : "auction over";
+    $("commitDeadlineVal").textContent = fmtDeadline(commitDl);
+    $("revealDeadlineVal").textContent = fmtDeadline(revealDl);
+    $("winnerVal").textContent = ended
+      ? (winner === ethers.ZeroAddress ? "no winner" : winner.slice(0,6) + "…" + winner.slice(-4) + " · " + ethers.formatEther(amount) + " DUSK")
+      : "not settled yet";
+    $("auctionStatus").textContent = "live";
+    $("statContract").textContent = "live";
+
+    // Drive the portal countdown from the real deadline for the current phase.
+    countdownTarget = name === "commit" ? Number(commitDl)
+      : name === "reveal" ? Number(revealDl)
+      : null;
+  } catch (e){
+    console.error(e);
+    $("auctionStatus").textContent = "RPC unreachable";
+    $("statContract").textContent = "unreachable";
+    countdownTarget = null;
+  }
+}
+
+// --- SealedEditions (the earned NFTs) ---
+const EDITIONS_ABI = [
+  "function balanceOf(address owner) view returns (uint256)",
+  "function ownerOf(uint256 tokenId) view returns (address)",
+  "function totalSupply() view returns (uint256)",
+  "function name() view returns (string)",
+  "function symbol() view returns (string)"
+];
+let editionsContract = null;
+
+async function initEditions(){
+  if (!readContract) return;
+  try {
+    const editionsAddr = await readContract.editions();
+    const ro = new ethers.JsonRpcProvider(RPC_URL);
+    editionsContract = new ethers.Contract(editionsAddr, EDITIONS_ABI, ro);
+  } catch (e){
+    console.error(e);
+  }
+}
+
+// Update the wallet panel + gallery with how many editions the connected
+// wallet holds. The "Auction Winner" seal (id 2) is the one minted on settle.
+async function refreshEditions(addr){
+  if (!editionsContract || !addr) return;
+  try {
+    const bal = await editionsContract.balanceOf(addr);
+    $("statEarned").textContent = bal.toString();
+    markSealOwned(2, bal > 0n);
+  } catch (e){
+    console.error(e);
+  }
+}
+
+async function initReadOnly(){
+  if (!CONTRACT_ADDRESS) return;
+  try {
+    const ro = new ethers.JsonRpcProvider(RPC_URL);
+    readContract = new ethers.Contract(CONTRACT_ADDRESS, ABI, ro);
+    await initEditions();
+    await refreshBidState();
+    setInterval(refreshBidState, 15000);
+  } catch (e){
+    console.error(e);
+  }
+}
+
+// Q7: persist the commit salt locally so a refresh doesn't kill a committed bid.
+const SALT_KEY = "sealed_salt";
+function loadOrCreateSalt(){
+  let salt = localStorage.getItem(SALT_KEY);
+  if (!salt){ salt = randomSalt(); localStorage.setItem(SALT_KEY, salt); }
+  return salt;
+}
+$("commitSalt").value = loadOrCreateSalt();
+// Pre-fill the reveal field with the saved salt so it's ready to use.
+$("revealSalt").value = localStorage.getItem(SALT_KEY) || "";
+$("copySaltBtn").addEventListener("click", async () => {
+  try {
+    await copyText($("commitSalt").value);
+    $("saltState").textContent = "Copied!";
+  } catch (e){ $("saltState").textContent = "Copy failed select it above"; }
+});
+
+$("commitBtn").addEventListener("click", async () => {
+  const msgEl = $("commitMsg");
+  if (!signer){ showMsg(msgEl, "Connect your wallet first.", "error"); return; }
+  if (!CONTRACT_ADDRESS){ showMsg(msgEl, "No contract address configured yet.", "error"); return; }
+  const amountStr = $("commitAmount").value;
+  const depositStr = $("commitDeposit").value;
+  const salt = $("commitSalt").value;
+  if (!amountStr || !depositStr){ showMsg(msgEl, "Enter a bid amount and deposit.", "error"); return; }
+  try {
+    $("commitBtn").disabled = true;
+    const amount = ethers.parseEther(amountStr);
+    const deposit = ethers.parseEther(depositStr);
+    const addr = await signer.getAddress();
+    const commitment = ethers.keccak256(ethers.solidityPacked(["uint256", "bytes32", "address"], [amount, salt, addr]));
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+    showMsg(msgEl, "Submitting commit…", "info");
+    const tx = await contract.commitBid(commitment, { value: deposit });
+    await tx.wait();
+    showMsg(msgEl, "Committed. Your salt is saved in this browser - you will need it to reveal.", "success");
+    await refreshBidState();
+  } catch (e){
+    console.error(e);
+    showMsg(msgEl, "Commit failed: " + (e.shortMessage || e.message || e), "error");
+  } finally { $("commitBtn").disabled = false; }
+});
+
+$("revealBtn").addEventListener("click", async () => {
+  const msgEl = $("revealMsg");
+  if (!signer){ showMsg(msgEl, "Connect your wallet first.", "error"); return; }
+  if (!CONTRACT_ADDRESS){ showMsg(msgEl, "No contract address configured yet.", "error"); return; }
+  const amountStr = $("revealAmount").value;
+  const salt = $("revealSalt").value;
+  if (!amountStr || !salt){ showMsg(msgEl, "Enter the amount and salt you committed with.", "error"); return; }
+  try {
+    $("revealBtn").disabled = true;
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+    showMsg(msgEl, "Submitting reveal…", "info");
+    const tx = await contract.revealBid(ethers.parseEther(amountStr), salt);
+    await tx.wait();
+    showMsg(msgEl, "Bid revealed.", "success");
+    localStorage.removeItem(SALT_KEY);
+    await refreshBidState();
+  } catch (e){
+    console.error(e);
+    showMsg(msgEl, "Reveal failed: " + (e.shortMessage || e.message || e), "error");
+  } finally { $("revealBtn").disabled = false; }
+});
+
+$("endBtn").addEventListener("click", async () => {
+  const msgEl = $("endMsg");
+  if (!signer){ showMsg(msgEl, "Connect your wallet first.", "error"); return; }
+  if (!CONTRACT_ADDRESS){ showMsg(msgEl, "No contract address configured yet.", "error"); return; }
+  try {
+    $("endBtn").disabled = true;
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+    showMsg(msgEl, "Ending auction…", "info");
+    const tx = await contract.endAuction();
+    await tx.wait();
+    showMsg(msgEl, "Auction ended the winner got their unique edition.", "success");
+    await refreshBidState();
+  } catch (e){
+    console.error(e);
+    showMsg(msgEl, "Could not end auction: " + (e.shortMessage || e.message || e), "error");
+  } finally { $("endBtn").disabled = false; }
+});
+
+$("withdrawBtn").addEventListener("click", async () => {
+  const msgEl = $("withdrawMsg");
+  if (!signer){ showMsg(msgEl, "Connect your wallet first.", "error"); return; }
+  if (!CONTRACT_ADDRESS){ showMsg(msgEl, "No contract address configured yet.", "error"); return; }
+  try {
+    $("withdrawBtn").disabled = true;
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+    showMsg(msgEl, "Withdrawing…", "info");
+    const tx = await contract.withdraw();
+    await tx.wait();
+    showMsg(msgEl, "Withdrawn.", "success");
+    await refreshBidState();
+  } catch (e){
+    console.error(e);
+    showMsg(msgEl, "Withdraw failed: " + (e.shortMessage || e.message || e), "error");
+  } finally { $("withdrawBtn").disabled = false; }
+});
+
+// Donate the address is a Dusk DS (public) address, so we copy it and the
+// visitor sends DUSK via the Dusk wallet. No EVM transfer (DS ≠ EVM address).
+function openDonatePopover(){
+  const pop = $("donatePopover");
+  $("dpAddress").textContent = DONATE_ADDRESS;
+  $("dpState").textContent = "";
+  pop.hidden = false;
+}
+
+function closeDonatePopover(){
+  $("donatePopover").hidden = true;
+}
+
+// Copy text to clipboard, with a fallback for non-secure contexts (file://).
+function copyText(text){
+  if (navigator.clipboard && window.isSecureContext){
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((resolve, reject) => {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error("copy failed"));
+    } catch (err){
+      document.body.removeChild(ta);
+      reject(err);
+    }
+  });
+}
+
+async function copyDonateAddress(){
+  const state = $("dpState");
+  try {
+    await copyText(DONATE_ADDRESS);
+    state.textContent = "Copied!";
+  } catch (e){
+    state.textContent = "Copy failed select it above";
+  }
+}
+
+$("donateBtn").addEventListener("click", () => {
+  if (!DONATE_ADDRESS){ showMsg($("msg"), "Donate address not set yet.", "info"); return; }
+  if ($("donatePopover").hidden){
+    openDonatePopover();
+  } else {
+    closeDonatePopover();
+  }
+});
+
+$("dpCopy").addEventListener("click", copyDonateAddress);
+
+document.addEventListener("click", (e) => {
+  if (!$("donatePopover").hidden && !e.target.closest(".donate-wrap")){
+    closeDonatePopover();
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeDonatePopover();
+});
+
+renderGallery();
+
+// Soft reveal-on-scroll for sections and gallery cards.
+function initReveals(){
+  const els = document.querySelectorAll(".reveal");
+  if (!("IntersectionObserver" in window)){
+    els.forEach((el) => el.classList.add("in-view"));
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting){
+        e.target.classList.add("in-view");
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  els.forEach((el) => io.observe(el));
+}
+
+// Subtle parallax on the hero portal the art drifts gently as you scroll.
+// Skipped when the user prefers reduced motion.
+function initParallax(){
+  const portal = document.querySelector(".portal svg");
+  if (!portal) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  let ticking = false;
+  const onScroll = () => {
+    const rect = portal.getBoundingClientRect();
+    const center = window.innerHeight / 2;
+    const dist = rect.top + rect.height / 2 - center;
+    const y = Math.max(-18, Math.min(18, dist * -0.05));
+    portal.style.transform = "translateY(" + y + "px)";
+    ticking = false;
+  };
+  window.addEventListener("scroll", () => {
+    if (!ticking){ window.requestAnimationFrame(onScroll); ticking = true; }
+  }, { passive: true });
+  onScroll();
+}
+
+// Live countdown in the portal. Before the scheduled start it counts down to
+// AUCTION_STARTS_AT ("starts in"); after that it shows the live contract phase
+// deadline (commit / reveal) set by refreshBidState().
+let pendingUntil = AUCTION_STARTS_AT ? new Date(AUCTION_STARTS_AT).getTime() : null;
+function fmtCountdown(diff){
+  if (diff <= 0) return "0:00";
+  const fmt = (n) => String(Math.max(0, n)).padStart(2, "0");
+  const h = Math.floor(diff / 3600);
+  const m = Math.floor((diff % 3600) / 60);
+  const s = diff % 60;
+  return h > 0 ? h + ":" + fmt(m) + ":" + fmt(s) : fmt(m) + ":" + fmt(s);
+}
+function initCountdown(){
+  setInterval(() => {
+    const el = $("countdown");
+    if (pendingUntil !== null && Date.now() < pendingUntil){
+      $("portalState").textContent = "starts in";
+      el.textContent = fmtCountdown(Math.floor(pendingUntil / 1000) - Math.floor(Date.now() / 1000));
+      return;
+    }
+    if (countdownTarget === null){
+      el.textContent = "";
+      return;
+    }
+    el.textContent = fmtCountdown(countdownTarget - Math.floor(Date.now() / 1000));
+  }, 1000);
+}
+
+initReveals();
+initParallax();
+initCountdown();
+initReadOnly();
+</script>
+</body>
+</html>
