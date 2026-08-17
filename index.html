@@ -442,7 +442,7 @@
       </svg>
       <div class="portal-text">
         <span class="pcount" id="countdown"></span>
-        <span class="ptier" id="portalState">starts in</span>
+        <span class="ptier" id="portalState">reading phase…</span>
       </div>
     </div>
   </div>
@@ -612,7 +612,7 @@ document.documentElement.classList.add("js");
 // Configuration contract wiring goes here once it's deployed.
 // Everything below is a self-contained frontend preview.
 // ---------------------------------------------------------------
-const CONTRACT_ADDRESS = "0x276E5522Bbb0708c106596366F1B3E8E1FE25596"; // SealedBidAuction (DuskEVM testnet)
+const CONTRACT_ADDRESS = "0x246c2df557b4A89447Eeb92Ca486a1AEeD9a606E"; // SealedBidAuction (DuskEVM testnet)
 const RPC_URL = "https://rpc.testnet.evm.dusk.network";
 const CHAIN_ID_HEX = "0x2e9";         // 745
 const CHAIN_ID = 745n;
@@ -624,9 +624,9 @@ const DONATE_ADDRESS = "mgqa1DENdj5MmczrvjVNs5JrGhZMCSVjtrX2titb3RrM4XL8n9bFuwXo
 
 // When the auction is scheduled to start (a "starts in" countdown until this
 // moment). After it passes, the portal shows the live contract phase countdown.
-// Computed below so the next auction always starts 24h from page load. Set to a
+// Computed below so the next auction always starts 2h from page load. Set to a
 // fixed ISO string instead if you want a specific date.
-const AUCTION_STARTS_AT = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+const AUCTION_STARTS_AT = ""; // empty: no "starts in" countdown, live from deploy
 
 // Contract ABI matches contracts/SealedBidAuction.sol (deployed to testnet).
 const ABI = [
@@ -1185,9 +1185,8 @@ function initParallax(){
   onScroll();
 }
 
-// Live countdown in the portal. Before the scheduled start it counts down to
-// AUCTION_STARTS_AT ("starts in"); after that it shows the live contract phase
-// deadline (commit / reveal) set by refreshBidState().
+// Live countdown in the portal. The auction is live from deploy: it counts down
+// to the current phase's deadline (commit, then reveal) set by refreshBidState().
 let pendingUntil = AUCTION_STARTS_AT ? new Date(AUCTION_STARTS_AT).getTime() : null;
 function fmtCountdown(diff){
   if (diff <= 0) return "0:00";
